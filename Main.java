@@ -5,14 +5,18 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println("What distance do you want the race to be?");
+        int distance = Integer.parseInt(scanner.nextLine());
+        System.out.println("How many Lanes do you want?");
+        int lanes = Integer.parseInt(scanner.nextLine());
         // Create a race of length 20 and 3 lanes
-        Race race = new Race(20, 4);
+        Race race = new Race(distance, lanes);
 
         // Load existing horses from file
         Map<String, Horse> savedHorses = loadSavedHorses("raceResults.txt");
 
-        for (int lane = 1; lane <= 3; lane++) {
-            System.out.println("Lane " + lane + ":");
+        for (int laneNumber = 1; laneNumber <= lanes; laneNumber++) {
+            System.out.println("Lane " + laneNumber + ":");
             System.out.print("Do you want to use a saved horse? (yes/no): ");
             String choice = scanner.nextLine().trim().toLowerCase();
 
@@ -43,7 +47,7 @@ public class Main {
                 selectedHorse = new Horse(symbol, name, confidence);
             }
 
-            race.addHorse(selectedHorse, lane);
+            race.addHorse(selectedHorse, laneNumber);
         }
 
         race.startRace();

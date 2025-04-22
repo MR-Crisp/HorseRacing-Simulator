@@ -92,10 +92,10 @@ public class Race
 
 
 
-//            //wait for 100 milliseconds
-//            try{
-//                TimeUnit.MILLISECONDS.sleep(100);
-//            }catch(Exception e){}
+            //wait for 100 milliseconds
+            try{
+                TimeUnit.MILLISECONDS.sleep(100);
+            }catch(Exception e){}
         }
         changeHorseConfidence();
         saveRaceResults( "raceResults.txt");
@@ -256,7 +256,7 @@ public class Race
                 double currentConfidence = horse.getConfidence();
 
                 if (horse.hasFallen()) {
-                    currentConfidence *= 0.5; // decrease by 50%
+                    currentConfidence *= 0.85; // decrease by 15%
                 } else if (horse.getDistanceTravelled() >= raceLength) {
                     currentConfidence *= 1.2; // increase by 20%
                 } else {

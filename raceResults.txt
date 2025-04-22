@@ -1,4 +1,6 @@
-Thunder,A,0.318
-Lightning,B,0.065
-Storm,C,0.218
-sui,+,0.85
+Thunder,A,0.7
+Lightning,B,0.7
+Storm,C,0.5
+sui,+,0.5
+aamir,G,0.5
+adam,L,0.5
