@@ -1,0 +1,4 @@
+Thunder,A,0.318
+Lightning,B,0.065
+Storm,C,0.218
+sui,+,0.85

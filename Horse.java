@@ -66,7 +66,8 @@ public class Horse
     }
 
     public void setConfidence(double newConfidence) {
-        confidenceRating = newConfidence;
+
+        confidenceRating = Math.floor(newConfidence * 1000) / 1000.0;//makes it 3 decimal place
     }
     
     public void setSymbol(char newSymbol) {
