@@ -1,6 +1,8 @@
-Thunder,A,0.7
-Lightning,B,0.7
-Storm,C,0.5
-sui,+,0.5
-aamir,G,0.5
-adam,L,0.5
+Thunder,A,0.7,0.5,0.5,metal,light,black,arabian
+Lightning,B,0.7,0.5,0.5,metal,light,black,arabian
+Storm,C,0.5,0.5,0.5,metal,light,black,arabian
+sui,+,0.5,0.5,0.5,metal,light,black,arabian
+aamir,G,0.5,0.5,0.5,metal,light,black,arabian
+adam,L,0.5,0.5,0.5,metal,light,black,arabian
+newest, Z, 0.500, 0.50, 0.50, Diamond, Doc Hudson, Black, Chick Hicks
+Alejandro, T, 0.500, 0.50, 0.50, Chainmail, Mator, Gray, Lightning McQueen
