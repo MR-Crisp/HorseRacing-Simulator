@@ -3,11 +3,14 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class Gui extends JFrame {
 
     private CardLayout cardLayout;
     private JPanel cardPanel;
+    private Race race = new Race(20,5);//default race class that can be changed later through settings
 
     public Gui() {
         setTitle("Game Start Screen");
@@ -23,7 +26,7 @@ public class Gui extends JFrame {
         JPanel mainMenu = createMainMenu(screenSize);
         JPanel customizeHorses = createCustomizeHorsesPanel(screenSize);
         JPanel horseStats = createHorseStatsPanel(screenSize);
-        JPanel trackSettings = createViewPanel("trackSettings", screenSize);
+        JPanel trackSettings = createTrackSettingsPanel( screenSize);
         JPanel betting = createViewPanel("betting", screenSize);
         JPanel startRace = createViewPanel("StartRace", screenSize);
 
@@ -153,6 +156,78 @@ public class Gui extends JFrame {
 
         return panel;
     }
+
+
+    private JPanel createTrackSettingsPanel(Dimension screenSize) {
+        JPanel panel = new JPanel();
+        panel.setPreferredSize(screenSize);
+        panel.setLayout(new BorderLayout());
+
+        // Title Label
+        JLabel title = new JLabel("Track Settings", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 36));
+        panel.add(title, BorderLayout.NORTH);
+
+        // Panel for the input fields
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(4, 2)); // Updated grid layout to 4x2 (including the button)
+
+        // Label and Input for first field (Track Length)
+        JLabel trackLengthLabel = new JLabel("Track Length: ");
+        JTextField trackLength = new JTextField();
+        inputPanel.add(trackLengthLabel);
+        inputPanel.add(trackLength);
+
+        // Label and Input for second field (Track Lanes)
+        JLabel trackLanesLabel = new JLabel("Track Lanes: ");
+        JTextField trackLanes = new JTextField();
+        inputPanel.add(trackLanesLabel);
+        inputPanel.add(trackLanes);
+
+        // Label and ComboBox for the drop-down field (Track Surface)
+        JLabel trackConditionsLabel = new JLabel("Track Surface: ");
+        String[] trackConditions = { "Blazing", "Normal", "Raining", "Freezing" }; // 4 options
+        JComboBox<String> trackSurfaceComboBox = new JComboBox<>(trackConditions);
+        inputPanel.add(trackConditionsLabel);
+        inputPanel.add(trackSurfaceComboBox);
+
+        // Submit Button
+        JButton submitButton = new JButton("Submit");
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get values from inputs
+                String trackLengthValue = trackLength.getText();
+                String trackLanesValue = trackLanes.getText();
+                String trackSurfaceValue = (String) trackSurfaceComboBox.getSelectedItem();
+
+                // Check if race object exists, if not, create a new one
+                if (race == null) {
+                    race = new Race(Integer.parseInt(trackLengthValue), Integer.parseInt(trackLanesValue));
+                } else {
+                    // Update the existing Race object
+                    race.setWeatherConditions(trackSurfaceValue);
+                    race.setRaceLength(Integer.parseInt(trackLengthValue));
+                    race.setLanes(Integer.parseInt(trackLanesValue));
+                }
+                
+
+                // Reset fields
+                trackLength.setText("");
+                trackLanes.setText("");
+                trackSurfaceComboBox.setSelectedIndex(0); // Reset to first option
+            }
+        });
+
+        // Add the submit button to the panel
+        inputPanel.add(submitButton);
+        // Add input panel to the center of the main panel
+        panel.add(inputPanel, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+
 
     private JPanel createCustomizeHorsesPanel(Dimension screenSize) {
         JPanel panel = new JPanel();

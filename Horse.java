@@ -5,7 +5,7 @@ import java.io.IOException;
 
 /**
  * Write a description of class Horse here.
- * 
+ *
  * @AamirAmin
  * @version (a version number or a date)
  */
@@ -25,7 +25,7 @@ public class Horse
     private String saddleType;
     private String colour;
 
-      
+
     //Constructor of class Horse
     /**
      * Constructor for objects of class Horse
@@ -44,35 +44,35 @@ public class Horse
         shoeType = shoe;
         this.colour = colour;
     }
-    
-    
-    
+
+
+
     //Other methods of class Horse
     public void fall() {
         fallen = true;
     }
-    
+
     public double getConfidence() {
         return confidenceRating;
     }
-    
+
     public int getDistanceTravelled() {
         return distance;
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public char getSymbol() {
         return symbol;
     }
-    
+
     public void goBackToStart() {
         distance = 0;
         fallen = false;
     }
-    
+
     public boolean hasFallen() {
         return fallen;
     }
@@ -117,7 +117,7 @@ public class Horse
 
         confidenceRating = Math.floor(newConfidence * 1000) / 1000.0;//makes it 3 decimal place
     }
-    
+
     public void setSymbol(char newSymbol) {
         symbol = newSymbol;
     }
