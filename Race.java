@@ -14,12 +14,24 @@ public class Race {
         horseArray = new Horse[lanes];
     }
 
+    public int getRaceLength(){
+        return raceLength;
+    }
+
+    public String getWeatherConditions() {
+        return weatherConditions;
+    }
+
     public void setRaceLength(int distance) {
         raceLength = distance;
     }
 
     public void setLanes(int lanes) {
         this.lanes = lanes;
+    }
+
+    public int getLanes(){
+        return lanes;
     }
 
     public void setWeatherConditions(String weather) {
@@ -184,5 +196,17 @@ public class Race {
         }
         return null;  // Return null if no horse has won yet
     }
+
+    public void assignHorsesToLanes(Horse[] horses) {
+        if (horses.length != lanes) {
+            System.out.println("Number of horses does not match number of lanes.");
+            return;
+        }
+
+        for (int i = 0; i < lanes; i++) {
+            horseArray[i] = horses[i]; // Assign horses to lanes based on the array passed
+        }
+    }
+
 
 }
