@@ -210,7 +210,7 @@ public class Gui extends JFrame {
                     race.setRaceLength(Integer.parseInt(trackLengthValue));
                     race.setLanes(Integer.parseInt(trackLanesValue));
                 }
-                
+
 
                 // Reset fields
                 trackLength.setText("");

@@ -24,6 +24,8 @@ public class Horse
     private String shoeType;
     private String saddleType;
     private String colour;
+    private int racesWon;
+    private int totalRaces;
 
 
     //Constructor of class Horse
@@ -43,9 +45,24 @@ public class Horse
         saddleType = saddle;
         shoeType = shoe;
         this.colour = colour;
+
     }
 
+    public void setRacesWon(int racesWon){
+        this.racesWon = racesWon;
+    }
 
+    public void setTotalRaces(int totalRaces){
+        this.totalRaces = totalRaces;
+    }
+
+    public int getRacesWon(){
+        return racesWon;
+    }
+
+    public int getTotalRaces(){
+        return totalRaces;
+    }
 
     //Other methods of class Horse
     public void fall() {
@@ -123,13 +140,11 @@ public class Horse
     }
 
 
-    // Write Horse information to a file in the desired format
     public void writeToFile(String filename) {
-        // Open file in append mode
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-            // Format: name, symbol, confidence, speed, endurance, shoe, saddle, colour, breed
-            writer.write(String.format("%s, %c, %.3f, %.2f, %.2f, %s, %s, %s, %s%n",
-                    name, symbol, confidenceRating, speed, endurance, shoeType, saddleType, colour, breed));
+            writer.write(String.format("%s, %c, %.3f, %.2f, %.2f, %s, %s, %s, %s, %d, %d%n",
+                    name, symbol, confidenceRating, speed, endurance,
+                    shoeType, saddleType, colour, breed, racesWon, totalRaces));
         } catch (IOException e) {
             e.printStackTrace();
         }

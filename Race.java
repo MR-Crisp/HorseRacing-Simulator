@@ -1,6 +1,4 @@
-// Replace entire Race class with this
 import java.util.concurrent.TimeUnit;
-import java.lang.Math;
 import java.io.*;
 import java.util.*;
 
@@ -24,12 +22,8 @@ public class Race {
         this.lanes = lanes;
     }
 
-    public void setWeatherConditions(String weather){
+    public void setWeatherConditions(String weather) {
         weatherConditions = weather;
-    }
-
-    public void assignHorses() {
-        // Optional: Auto assign horses here
     }
 
     public void addHorse(Horse theHorse, int laneNumber) {
@@ -179,6 +173,16 @@ public class Race {
 
     public Horse[] getHorseArray() {
         return horseArray;
+    }
+
+    public Horse getWinner() {
+        Horse[] horses = getHorseArray();
+        for (Horse horse : horses) {
+            if (horse != null && horse.getDistanceTravelled() >= raceLength) {
+                return horse;
+            }
+        }
+        return null;  // Return null if no horse has won yet
     }
 
 }
