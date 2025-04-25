@@ -11,7 +11,6 @@ public class Gui extends JFrame {
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private Race race = new Race(20, 3); // default race class
-    private RacePanel racePanel;
 
     public Gui() {
         setTitle("Game Start Screen");
@@ -29,7 +28,7 @@ public class Gui extends JFrame {
         JPanel horseStats = createHorseStatsPanel(screenSize);
         JPanel trackSettings = createTrackSettingsPanel(screenSize);
         JPanel betting = createViewPanel("betting", screenSize);
-        JPanel startRace = createStartRacePanel(screenSize);
+        JPanel startRace = createRaceScreen();
 
         cardPanel.add(mainMenu, "MainMenu");
         cardPanel.add(customizeHorses, "customizeHorses");
@@ -87,6 +86,79 @@ public class Gui extends JFrame {
 
         panel.add(label, BorderLayout.CENTER);
         panel.add(backButton, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private JPanel createCustomizeHorsesPanel(Dimension screenSize) {
+        JPanel panel = new JPanel();
+        panel.setPreferredSize(screenSize);
+        panel.setLayout(new BorderLayout());
+
+        JLabel title = new JLabel("Customize Horses", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 36));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 100, 30, 100));
+
+        JTextField horseNameField = new JTextField();
+        JComboBox<String> breedBox = new JComboBox<>(new String[] {"Arabian", "Thoroughbred", "Chick Hicks", "Lightning McQueen"});
+        JComboBox<String> colorBox = new JComboBox<>(new String[] {"Black", "Brown", "Chestnut", "Gray", "White"});
+        JComboBox<String> saddleBox = new JComboBox<>(new String[] {"Doc Hudson", "Western", "Racing", "Mator"});
+        JComboBox<String> shoeBox = new JComboBox<>(new String[] {"Diamond", "Iron", "Leather", "Chainmail"});
+        JTextField symbolField = new JTextField();
+
+        formPanel.add(new JLabel("Horse Name:"));
+        formPanel.add(horseNameField);
+        formPanel.add(new JLabel("Breed:"));
+        formPanel.add(breedBox);
+        formPanel.add(new JLabel("Color:"));
+        formPanel.add(colorBox);
+        formPanel.add(new JLabel("Saddle:"));
+        formPanel.add(saddleBox);
+        formPanel.add(new JLabel("Horse Shoe type:"));
+        formPanel.add(shoeBox);
+        formPanel.add(new JLabel("Symbol:"));
+        formPanel.add(symbolField);
+
+        panel.add(formPanel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel();
+        JButton submitButton = new JButton("Submit");
+        JButton backButton = new JButton("Back to Menu");
+
+        submitButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        backButton.setFont(new Font("Arial", Font.PLAIN, 18));
+
+        submitButton.addActionListener(e -> {
+            String horseName = horseNameField.getText();
+            String breed = (String) breedBox.getSelectedItem();
+            String colour = (String) colorBox.getSelectedItem();
+            String saddle = (String) saddleBox.getSelectedItem();
+            String shoe = (String) shoeBox.getSelectedItem();
+            String symbol = symbolField.getText();
+            char horseSymbol = symbol.isEmpty() ? '?' : symbol.charAt(0);
+
+            Horse h = new Horse(horseSymbol, horseName, breed, shoe, saddle, colour);
+            h.writeToFile("raceResults.txt");
+
+            JOptionPane.showMessageDialog(this, "Horse created and saved!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            horseNameField.setText("");
+            breedBox.setSelectedIndex(0);
+            colorBox.setSelectedIndex(0);
+            saddleBox.setSelectedIndex(0);
+            shoeBox.setSelectedIndex(0);
+            symbolField.setText("");
+        });
+
+        backButton.addActionListener(e -> cardLayout.show(cardPanel, "MainMenu"));
+
+        buttonPanel.add(submitButton);
+        buttonPanel.add(backButton);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
 
         return panel;
     }
@@ -199,7 +271,7 @@ public class Gui extends JFrame {
         configPanel.add(lanesLabel);
         configPanel.add(lanesField);
 
-        // Weather conditions (keeping your original options)
+        // Weather conditions
         JLabel weatherLabel = new JLabel("Track Surface:");
         String[] weatherOptions = {"Blazing", "Normal", "Raining", "Freezing"};
         JComboBox<String> weatherCombo = new JComboBox<>(weatherOptions);
@@ -290,11 +362,6 @@ public class Gui extends JFrame {
                 // Assign horses to lanes
                 race.assignHorsesToLanes(selectedHorses);
 
-                // Update race panel if it exists
-                if (racePanel != null) {
-                    racePanel.repaint();
-                }
-
                 JOptionPane.showMessageDialog(this, "Settings saved!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
             } catch (NumberFormatException ex) {
@@ -321,107 +388,161 @@ public class Gui extends JFrame {
 
 
 
-    private JPanel createStartRacePanel(Dimension screenSize) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(screenSize);
+    private JPanel createRaceScreen() {
+        JPanel panel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setStroke(new BasicStroke(2));
 
-        racePanel = new RacePanel(race.getLanes());
-        panel.add(racePanel, BorderLayout.CENTER);
+                int totalHeight = getHeight() - 100; // Use dynamic height
+                int numLanes = race.getLanes();
+                if (numLanes == 0) return; // Avoid division by zero
 
-        JButton startButton = new JButton("Start Race");
-        startButton.setFont(new Font("Arial", Font.PLAIN, 24));
-        startButton.addActionListener(e -> {
-            new Thread(() -> {
-                race.startRace(); // Start the race in a separate thread to avoid blocking the UI
-                SwingUtilities.invokeLater(() -> {
-                    racePanel.repaint(); // Repaint the race panel after the race is complete
-                });
-            }).start();
-        });
+                int LANE_HEIGHT = totalHeight / numLanes;
+                int raceLength = race.getRaceLength();
+                int xMARGIN = (getWidth() - raceLength) / 2;
 
-        JButton backButton = new JButton("Back to Menu");
-        backButton.setFont(new Font("Arial", Font.PLAIN, 24));
-        backButton.addActionListener(e -> cardLayout.show(cardPanel, "MainMenu"));
+                // Draw finish line
+                g2.setColor(Color.RED);
+                g2.drawLine(xMARGIN + raceLength, 50, xMARGIN + raceLength, totalHeight + 50);
 
-        JPanel bottomPanel = new JPanel(new FlowLayout());
-        bottomPanel.add(startButton);
-        bottomPanel.add(backButton);
+                Horse[] horses = race.getHorseArray();
 
-        panel.add(bottomPanel, BorderLayout.SOUTH);
-        return panel;
-    }
+                for (int i = 0; i < numLanes; i++) {
+                    int y = i * LANE_HEIGHT + LANE_HEIGHT / 2 + 50; // Add 50px top margin
 
+                    // Draw lane line
+                    g2.setColor(Color.BLACK);
+                    g2.drawLine(xMARGIN, y, raceLength + xMARGIN, y);
 
-    private JPanel createCustomizeHorsesPanel(Dimension screenSize) {
-        JPanel panel = new JPanel();
-        panel.setPreferredSize(screenSize);
-        panel.setLayout(new BorderLayout());
+                    if (i < horses.length && horses[i] != null) {
+                        Horse horse = horses[i];
+                        int dist = horse.getDistanceTravelled();
+                        int x = xMARGIN + Math.min(dist, raceLength);
 
-        JLabel title = new JLabel("Customize Horses", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 36));
-        panel.add(title, BorderLayout.NORTH);
+                        // Set color based on coatColour
+                        String coat = horse.getColour();
+                        switch (coat.toLowerCase()) {
+                            case "red":
+                                g2.setColor(Color.RED);
+                                break;
+                            case "green":
+                                g2.setColor(Color.GREEN);
+                                break;
+                            case "blue":
+                                g2.setColor(Color.BLUE);
+                                break;
+                            default:
+                                g2.setColor(Color.GRAY);
+                                break;
+                        }
 
-        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 100, 30, 100));
+                        if (horse.hasFallen()) {
+                            // Draw a black cross (X)
+                            g2.setColor(Color.BLACK);
+                            int size = 20;
+                            g2.drawLine(x, y - size / 2, x + size, y + size / 2);
+                            g2.drawLine(x, y + size / 2, x + size, y - size / 2);
 
-        JTextField horseNameField = new JTextField();
-        JComboBox<String> breedBox = new JComboBox<>(new String[] {"Arabian", "Thoroughbred", "Chick Hicks", "Lightning McQueen"});
-        JComboBox<String> colorBox = new JComboBox<>(new String[] {"Black", "Brown", "Chestnut", "Gray", "White"});
-        JComboBox<String> saddleBox = new JComboBox<>(new String[] {"Doc Hudson", "Western", "Racing", "Mator"});
-        JComboBox<String> shoeBox = new JComboBox<>(new String[] {"Diamond", "Iron", "Leather", "Chainmail"});
-        JTextField symbolField = new JTextField();
+                            // Draw horse info
+                            g2.setFont(new Font("Arial", Font.BOLD, 12));
+                            g2.drawString(String.valueOf(horse.getSymbol()), x, y - 15);
+                            g2.drawString(horse.getName(), x, y + 25);
+                        } else {
+                            // Draw horse shape based on breed
+                            switch (horse.getBreed().toLowerCase()) {
+                                case "thoroughbred":
+                                    g2.fillOval(x, y - 10, 20, 20);
+                                    break;
+                                case "arabian":
+                                    g2.fillRect(x, y - 10, 20, 20);
+                                    break;
+                                case "quarter horse":
+                                    int[] triangleX = {x, x + 10, x + 20};
+                                    int[] triangleY = {y + 10, y - 10, y + 10};
+                                    g2.fillPolygon(triangleX, triangleY, 3);
+                                    break;
+                                default:
+                                    g2.fillOval(x, y - 10, 20, 20);
+                                    break;
+                            }
 
-        formPanel.add(new JLabel("Horse Name:"));
-        formPanel.add(horseNameField);
-        formPanel.add(new JLabel("Breed:"));
-        formPanel.add(breedBox);
-        formPanel.add(new JLabel("Color:"));
-        formPanel.add(colorBox);
-        formPanel.add(new JLabel("Saddle:"));
-        formPanel.add(saddleBox);
-        formPanel.add(new JLabel("Horse Shoe type:"));
-        formPanel.add(shoeBox);
-        formPanel.add(new JLabel("Symbol:"));
-        formPanel.add(symbolField);
+                            // Draw horse info
+                            g2.setColor(Color.BLACK);
+                            g2.setFont(new Font("Arial", Font.BOLD, 12));
+                            g2.drawString(String.valueOf(horse.getSymbol()), x, y - 15);
+                            g2.drawString(horse.getName(), x, y + 25);
 
-        panel.add(formPanel, BorderLayout.CENTER);
+                            // Draw stats
+                            g2.setFont(new Font("Arial", Font.PLAIN, 10));
+                            int statY = y + 40;
+                            g2.drawString("Dist: " + horse.getDistanceTravelled(), x, statY);
+                            g2.drawString("Speed: " + horse.getSpeed(), x, statY + 15);
+                            g2.drawString("Conf: " + String.format("%.2f", horse.getConfidence()), x, statY + 30);
+                        }
+                    }
+                }
+            }
+        };
 
+        // Button panel
         JPanel buttonPanel = new JPanel();
-        JButton submitButton = new JButton("Submit");
+        JButton startButton = new JButton("Start Race");
         JButton backButton = new JButton("Back to Menu");
 
-        submitButton.setFont(new Font("Arial", Font.PLAIN, 18));
-        backButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        startButton.setFont(new Font("Arial", Font.PLAIN, 24));
+        backButton.setFont(new Font("Arial", Font.PLAIN, 24));
 
-        submitButton.addActionListener(e -> {
-            String horseName = horseNameField.getText();
-            String breed = (String) breedBox.getSelectedItem();
-            String colour = (String) colorBox.getSelectedItem();
-            String saddle = (String) saddleBox.getSelectedItem();
-            String shoe = (String) shoeBox.getSelectedItem();
-            String symbol = symbolField.getText();
-            char horseSymbol = symbol.isEmpty() ? '?' : symbol.charAt(0);
+        // Timer for race animation
+        Timer raceTimer = new Timer(100, e -> {
+            boolean finished = race.step();
+            panel.repaint();
 
-            Horse h = new Horse(horseSymbol, horseName, breed, shoe, saddle, colour);
-            h.writeToFile("raceResults.txt");
+            if (finished) {
+                ((Timer)e.getSource()).stop();
+                StringBuilder winners = new StringBuilder("Winner(s):\n");
+                Horse[] horses = race.getHorseArray();
 
-            JOptionPane.showMessageDialog(this, "Horse created and saved!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                for (int i = 0; i < horses.length; i++) {
+                    Horse h = horses[i];
+                    if (h != null && h.getDistanceTravelled() >= race.getRaceLength()) {
+                        winners.append(h.getName()).append("\n");
+                    }
+                    // Reset horses for next race
+                    if (h != null) {
+                        h.goBackToStart();
+                    }
+                }
 
-            horseNameField.setText("");
-            breedBox.setSelectedIndex(0);
-            colorBox.setSelectedIndex(0);
-            saddleBox.setSelectedIndex(0);
-            shoeBox.setSelectedIndex(0);
-            symbolField.setText("");
+                JOptionPane.showMessageDialog(panel, winners.toString());
+                startButton.setEnabled(true);
+            }
         });
 
-        backButton.addActionListener(e -> cardLayout.show(cardPanel, "MainMenu"));
+        startButton.addActionListener(e -> {
+            // Reset all horses before starting new race
+            Horse[] horses = race.getHorseArray();
+            for (int i = 0; i < horses.length; i++) {
+                Horse h = horses[i];
+                if (h != null) {
+                    h.goBackToStart();
+                }
+            }
+            raceTimer.start();
+            startButton.setEnabled(false);
+        });
 
-        buttonPanel.add(submitButton);
+        backButton.addActionListener(e -> {
+            raceTimer.stop();
+            cardLayout.show(cardPanel, "MainMenu");
+        });
+
+        buttonPanel.add(startButton);
         buttonPanel.add(backButton);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
-
         return panel;
     }
 

@@ -208,5 +208,41 @@ public class Race {
         }
     }
 
+    public boolean step() {
+        // Move all horses first
+        for (Horse horse : horseArray) {
+            if (horse != null) {
+                moveHorse(horse);
+            }
+        }
+
+        // Check if any horse has won
+        for (Horse horse : horseArray) {
+            if (horse != null && horse.getDistanceTravelled() >= raceLength) {
+                return true;
+            }
+        }
+
+        // Check if all horses have fallen
+        int numberOfHorses = 0;
+        int numberOfFallenHorses = 0;
+
+        for (Horse horse : horseArray) {
+            if (horse != null) {
+                numberOfHorses++;
+                if (horse.hasFallen()) {
+                    numberOfFallenHorses++;
+                }
+            }
+        }
+
+        // If all horses have fallen and there are horses in the race
+        if (numberOfHorses > 0 && numberOfHorses == numberOfFallenHorses) {
+            return true;
+        }
+
+        return false;
+    }
+
 
 }
