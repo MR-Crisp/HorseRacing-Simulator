@@ -1,6 +1,4 @@
-import java.util.concurrent.TimeUnit;
 import java.io.*;
-import java.util.*;
 
 public class Race {
     private int raceLength;
@@ -28,6 +26,7 @@ public class Race {
 
     public void setLanes(int lanes) {
         this.lanes = lanes;
+        this.horseArray = new Horse[lanes];
     }
 
     public int getLanes(){
@@ -38,131 +37,43 @@ public class Race {
         weatherConditions = weather;
     }
 
-    public void addHorse(Horse theHorse, int laneNumber) {
-        if (laneNumber > lanes || laneNumber < 1) {
-            System.out.println("Lane number out of range");
-            return;
-        }
-        horseArray[laneNumber - 1] = theHorse;
-    }
-
-    public void startRace() {
-        boolean finished = false;
-
-        for (int i = 0; i < lanes; i++) {
-            if (horseArray[i] != null) {
-                horseArray[i].goBackToStart();
-            }
-        }
-
-        while (!finished) {
-            for (int i = 0; i < lanes; i++) {
-                if (horseArray[i] != null) {
-                    moveHorse(horseArray[i]);
-                }
-            }
-
-            printRace();
-
-            for (int i = 0; i < lanes; i++) {
-                if (horseArray[i] != null && raceWonBy(horseArray[i])) {
-                    finished = true;
-                }
-            }
-
-            if (!finished) {
-                finished = true;
-                for (int i = 0; i < lanes; i++) {
-                    if (horseArray[i] != null && !horseArray[i].hasFallen()) {
-                        finished = false;
-                    }
-                }
-            }
-
-            try {
-                TimeUnit.MILLISECONDS.sleep(100);
-            } catch (Exception e) {
-            }
-        }
-
-        changeHorseConfidence();
-        saveRaceResults("raceResults.txt");
-    }
-
     private void moveHorse(Horse theHorse) {
         if (!theHorse.hasFallen()) {
-            double chanceToMove = theHorse.getConfidence() * theHorse.getSpeed();
+            double chanceToMove = (theHorse.getConfidence() + theHorse.getSpeed())/2 ;//still between 0 and 1
             if (Math.random() < chanceToMove) {
                 theHorse.moveForward();
             }
 
-            double fallProbability = 0.1 * theHorse.getConfidence() * theHorse.getConfidence() / theHorse.getEndurance();
+            double baseProbability = 0.07;//7 percent chance cause 10 too high
+            if (weatherConditions != null) {
+                switch (weatherConditions.toLowerCase()) {
+                    case "freezing":
+                        baseProbability *= 1.6;
+                        break;
+                    case "raining":
+                        baseProbability *= 1.3;
+                        break;
+                    case "blazing":
+                        baseProbability *= 0.7;//reduce fall
+                        break;
+                    //no need for normal cause as stays same
+                }
+            }
+
+            double fallProbability = baseProbability * Math.pow(theHorse.getConfidence(),2) / theHorse.getEndurance();//proportional to confidence but inverse to endurance
             if (Math.random() < fallProbability) {
                 theHorse.fall();
             }
         }
     }
 
-    private boolean raceWonBy(Horse theHorse) {
-        return theHorse.getDistanceTravelled() >= raceLength;
-    }
-
-    private void printRace() {
-        System.out.print('\u000C');
-        multiplePrint('=', raceLength + 3);
-        System.out.println();
-
-        for (int i = 0; i < lanes; i++) {
-            if (horseArray[i] != null) {
-                printLane(horseArray[i]);
-                System.out.println();
-            } else {
-                printEmptyLane();
+    private void saveRaceResults(Horse[] horseArray) {
+        for (Horse horse: horseArray){
+            if (horse!=null) {
+                horse.writeToFile("raceResults.txt");
             }
         }
 
-        multiplePrint('=', raceLength + 3);
-        System.out.println();
-    }
-
-    private void printLane(Horse theHorse) {
-        int spacesBefore = theHorse.getDistanceTravelled();
-        int spacesAfter = raceLength - theHorse.getDistanceTravelled();
-        System.out.print('|');
-        multiplePrint(' ', spacesBefore);
-        System.out.print(theHorse.hasFallen() ? '\u274C' : theHorse.getSymbol());
-        multiplePrint(' ', spacesAfter);
-        System.out.print('|');
-    }
-
-    private void printEmptyLane() {
-        System.out.print('|');
-        multiplePrint(' ', raceLength + 1);
-        System.out.print('|');
-        System.out.println();
-    }
-
-    private void multiplePrint(char aChar, int times) {
-        for (int i = 0; i < times; i++) {
-            System.out.print(aChar);
-        }
-    }
-
-    private void saveRaceResults(String filename) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            for (Horse horse : horseArray) {
-                if (horse != null) {
-                    // Save extended info (same format as Horse.writeToFile)
-                    writer.write(String.format("%s, %c, %.3f, %.2f, %.2f, %s, %s, %s, %s%n",
-                            horse.getName(), horse.getSymbol(), horse.getConfidence(),
-                            horse.getSpeed(), horse.getEndurance(),
-                            horse.getShoeType(), horse.getSaddleType(), horse.getColour(), horse.getBreed()));
-                }
-            }
-            System.out.println("Horse data saved to " + filename);
-        } catch (IOException e) {
-            System.err.println("Error writing horse data: " + e.getMessage());
-        }
     }
 
     private void changeHorseConfidence() {
@@ -208,7 +119,7 @@ public class Race {
         }
     }
 
-    public boolean step() {
+    public boolean incrementRace() {
         // Move all horses first
         for (Horse horse : horseArray) {
             if (horse != null) {
@@ -219,6 +130,13 @@ public class Race {
         // Check if any horse has won
         for (Horse horse : horseArray) {
             if (horse != null && horse.getDistanceTravelled() >= raceLength) {
+                horse.setRacesWon(horse.getRacesWon()+1);//plus 1 races one
+                for(Horse allHorses: horseArray){
+                    allHorses.setTotalRaces(horse.getTotalRaces()+1);//increment total races for horse
+                }
+                horse.setTotalRaces(horse.getTotalRaces()+1);
+                changeHorseConfidence();//race over and change horse confidence
+                saveRaceResults(horseArray);
                 return true;
             }
         }
@@ -238,6 +156,13 @@ public class Race {
 
         // If all horses have fallen and there are horses in the race
         if (numberOfHorses > 0 && numberOfHorses == numberOfFallenHorses) {
+            changeHorseConfidence();//race over and change confidence
+            for (Horse horse: horseArray){
+                if (horse != null) {//make sure there is horse in lane
+                    horse.setTotalRaces(horse.getTotalRaces() + 1);//increment total races for each horse
+                }
+            }
+            saveRaceResults(horseArray);
             return true;
         }
 

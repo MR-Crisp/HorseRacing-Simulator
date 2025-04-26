@@ -3,8 +3,6 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class Gui extends JFrame {
 
@@ -181,7 +179,7 @@ public class Gui extends JFrame {
         JComboBox<String> horseSelector = new JComboBox<>();
 
         for (Horse horse : horses) {
-            if (horse != null) { // ✅ Null check to prevent crash
+            if (horse != null) {
                 horseSelector.addItem(horse.getName());
             }
         }
@@ -275,10 +273,9 @@ public class Gui extends JFrame {
         JLabel weatherLabel = new JLabel("Track Surface:");
         String[] weatherOptions = {"Blazing", "Normal", "Raining", "Freezing"};
         JComboBox<String> weatherCombo = new JComboBox<>(weatherOptions);
-        weatherCombo.setSelectedItem(race.getWeatherConditions());
+        weatherCombo.setSelectedItem(race.getWeatherConditions() != null ? race.getWeatherConditions() : "Normal");
         configPanel.add(weatherLabel);
         configPanel.add(weatherCombo);
-
         contentPanel.add(configPanel);
         contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
@@ -393,101 +390,130 @@ public class Gui extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setStroke(new BasicStroke(2));
+                Graphics2D graphics2DPen = (Graphics2D) g;
+                graphics2DPen.setStroke(new BasicStroke(2));
 
-                int totalHeight = getHeight() - 100; // Use dynamic height
-                int numLanes = race.getLanes();
-                if (numLanes == 0) return; // Avoid division by zero
-
-                int LANE_HEIGHT = totalHeight / numLanes;
-                int raceLength = race.getRaceLength();
-                int xMARGIN = (getWidth() - raceLength) / 2;
-
-                // Draw finish line
-                g2.setColor(Color.RED);
-                g2.drawLine(xMARGIN + raceLength, 50, xMARGIN + raceLength, totalHeight + 50);
+                int panelWidth = getWidth();
+                int panelHeight = getHeight();
 
                 Horse[] horses = race.getHorseArray();
+                int numLanes = race.getLanes();
+                int raceLength = race.getRaceLength();
 
+                if (numLanes == 0 || horses == null) return;
+
+                int marginX = (int) (panelWidth * 0.1); // 10% margins on sides
+                int marginY = (int) (panelHeight * 0.1); // 10% margins on top/bottom
+
+                int usableWidth = panelWidth - 2 * marginX;
+                int usableHeight = panelHeight - 2 * marginY;
+
+                int laneHeight = usableHeight / numLanes;
+
+                // Draw lanes as rectangles
                 for (int i = 0; i < numLanes; i++) {
-                    int y = i * LANE_HEIGHT + LANE_HEIGHT / 2 + 50; // Add 50px top margin
+                    int laneTop = marginY + i * laneHeight;
 
-                    // Draw lane line
-                    g2.setColor(Color.BLACK);
-                    g2.drawLine(xMARGIN, y, raceLength + xMARGIN, y);
+                    // Lane background depending on the weather. default/normal are same.
+                    switch (race.getWeatherConditions()){
+                        case "Blazing":
+                            graphics2DPen.setColor(new Color(255, 36, 0));
+                            break;
+                        case "Normal":
+                            graphics2DPen.setColor(new Color(255, 239, 184));
+                            break;
+                        case "Raining":
+                            graphics2DPen.setColor(new Color(113, 138, 150));
+                            break;
+                        case "Freezing":
+                            graphics2DPen.setColor(new Color(173, 216, 230));
+                            break;
+                      
+                    }
+
+                    graphics2DPen.fillRect(marginX, laneTop, usableWidth, laneHeight);
+
+                    // Lane border
+                    graphics2DPen.setColor(Color.BLACK);
+                    graphics2DPen.drawRect(marginX, laneTop, usableWidth, laneHeight);
 
                     if (i < horses.length && horses[i] != null) {
                         Horse horse = horses[i];
-                        int dist = horse.getDistanceTravelled();
-                        int x = xMARGIN + Math.min(dist, raceLength);
+                        int distance = horse.getDistanceTravelled();
+                        int x = marginX + Math.min(distance * usableWidth / raceLength, usableWidth);
 
-                        // Set color based on coatColour
-                        String coat = horse.getColour();
-                        switch (coat.toLowerCase()) {
-                            case "red":
-                                g2.setColor(Color.RED);
+                        int centerY = laneTop + laneHeight / 2;
+
+                        // Horse color by coat
+                        //Black", "Brown", "Chestnut", "Gray", "White
+                        switch (horse.getColour().toLowerCase()) {
+                            case "black":
+                                graphics2DPen.setColor(Color.BLACK);
                                 break;
-                            case "green":
-                                g2.setColor(Color.GREEN);
+                            case "brown":
+                                graphics2DPen.setColor(new Color(233, 116, 81));//they dont have a default brown value so i put burnt siena
                                 break;
-                            case "blue":
-                                g2.setColor(Color.BLUE);
+                            case "gray":
+                                graphics2DPen.setColor(Color.GRAY);
                                 break;
-                            default:
-                                g2.setColor(Color.GRAY);
+                            case "white":
+                                graphics2DPen.setColor(Color.WHITE);
                                 break;
+                            case "chestnut":
+                                graphics2DPen.setColor(Color.YELLOW);
                         }
 
+                        // If fallen, draw black cross
                         if (horse.hasFallen()) {
-                            // Draw a black cross (X)
-                            g2.setColor(Color.BLACK);
-                            int size = 20;
-                            g2.drawLine(x, y - size / 2, x + size, y + size / 2);
-                            g2.drawLine(x, y + size / 2, x + size, y - size / 2);
+                            graphics2DPen.setColor(Color.BLACK);
+                            int size = laneHeight / 3;
+                            graphics2DPen.drawLine(x - size, centerY - size, x + size, centerY + size);
+                            graphics2DPen.drawLine(x - size, centerY + size, x + size, centerY - size);
 
-                            // Draw horse info
-                            g2.setFont(new Font("Arial", Font.BOLD, 12));
-                            g2.drawString(String.valueOf(horse.getSymbol()), x, y - 15);
-                            g2.drawString(horse.getName(), x, y + 25);
+                            graphics2DPen.setFont(new Font("Arial", Font.BOLD, laneHeight / 5));
+                            graphics2DPen.drawString(horse.getName(), x + 5, centerY + size + 15);
                         } else {
-                            // Draw horse shape based on breed
+                            // Horse shape by breed
+                            int horseSize = laneHeight / 2;
                             switch (horse.getBreed().toLowerCase()) {
                                 case "thoroughbred":
-                                    g2.fillOval(x, y - 10, 20, 20);
+                                    graphics2DPen.fillOval(x, centerY - horseSize / 2, horseSize, horseSize);
                                     break;
                                 case "arabian":
-                                    g2.fillRect(x, y - 10, 20, 20);
+                                    graphics2DPen.fillRect(x, centerY - horseSize / 2, horseSize, horseSize);
                                     break;
-                                case "quarter horse":
-                                    int[] triangleX = {x, x + 10, x + 20};
-                                    int[] triangleY = {y + 10, y - 10, y + 10};
-                                    g2.fillPolygon(triangleX, triangleY, 3);
+                                case "chick hicks":
+                                    int[] triangleX = {x, x + horseSize / 2, x + horseSize};
+                                    int[] triangleY = {centerY + horseSize / 2, centerY - horseSize / 2, centerY + horseSize / 2};
+                                    graphics2DPen.fillPolygon(triangleX, triangleY, 3);
                                     break;
-                                default:
-                                    g2.fillOval(x, y - 10, 20, 20);
+                                case "lightning mcqueen":
+                                    int[] pentagonX = {x + horseSize / 2, x + horseSize, x + 3 * horseSize / 4, x + horseSize / 4, x};
+                                    int[] pentagonY = {centerY - horseSize / 2, centerY, centerY + horseSize / 2, centerY + horseSize / 2, centerY};
+                                    graphics2DPen.fillPolygon(pentagonX, pentagonY, 5);
                                     break;
                             }
 
-                            // Draw horse info
-                            g2.setColor(Color.BLACK);
-                            g2.setFont(new Font("Arial", Font.BOLD, 12));
-                            g2.drawString(String.valueOf(horse.getSymbol()), x, y - 15);
-                            g2.drawString(horse.getName(), x, y + 25);
-
-                            // Draw stats
-                            g2.setFont(new Font("Arial", Font.PLAIN, 10));
-                            int statY = y + 40;
-                            g2.drawString("Dist: " + horse.getDistanceTravelled(), x, statY);
-                            g2.drawString("Speed: " + horse.getSpeed(), x, statY + 15);
-                            g2.drawString("Conf: " + String.format("%.2f", horse.getConfidence()), x, statY + 30);
+                            // Horse info
+                            graphics2DPen.setColor(Color.BLACK);
+                            graphics2DPen.setFont(new Font("Arial", Font.BOLD, laneHeight / 5));
+                            graphics2DPen.drawString(horse.getName(), x + horseSize + 5, centerY);
                         }
                     }
                 }
+
+                // Draw finish line ONLY from top of first lane to bottom of last lane
+                int finishX = marginX + usableWidth;
+                int finishTop = marginY;
+                int finishBottom = marginY + laneHeight * numLanes;
+
+                graphics2DPen.setColor(Color.RED);
+                graphics2DPen.setStroke(new BasicStroke(4));
+                graphics2DPen.drawLine(finishX, finishTop, finishX, finishBottom);
             }
         };
 
-        // Button panel
+        // Buttons panel
         JPanel buttonPanel = new JPanel();
         JButton startButton = new JButton("Start Race");
         JButton backButton = new JButton("Back to Menu");
@@ -495,22 +521,20 @@ public class Gui extends JFrame {
         startButton.setFont(new Font("Arial", Font.PLAIN, 24));
         backButton.setFont(new Font("Arial", Font.PLAIN, 24));
 
-        // Timer for race animation
+        // Race animation
         Timer raceTimer = new Timer(100, e -> {
-            boolean finished = race.step();
+            boolean finished = race.incrementRace();
             panel.repaint();
 
             if (finished) {
-                ((Timer)e.getSource()).stop();
+                ((Timer) e.getSource()).stop();
                 StringBuilder winners = new StringBuilder("Winner(s):\n");
                 Horse[] horses = race.getHorseArray();
 
-                for (int i = 0; i < horses.length; i++) {
-                    Horse h = horses[i];
+                for (Horse h : horses) {
                     if (h != null && h.getDistanceTravelled() >= race.getRaceLength()) {
                         winners.append(h.getName()).append("\n");
                     }
-                    // Reset horses for next race
                     if (h != null) {
                         h.goBackToStart();
                     }
@@ -522,10 +546,8 @@ public class Gui extends JFrame {
         });
 
         startButton.addActionListener(e -> {
-            // Reset all horses before starting new race
-            Horse[] horses = race.getHorseArray();
-            for (int i = 0; i < horses.length; i++) {
-                Horse h = horses[i];
+            // Reset horses
+            for (Horse h : race.getHorseArray()) {
                 if (h != null) {
                     h.goBackToStart();
                 }
@@ -545,6 +567,7 @@ public class Gui extends JFrame {
         panel.add(buttonPanel, BorderLayout.SOUTH);
         return panel;
     }
+
 
     private void newHorseCreation() {
         cardLayout.show(cardPanel, "customizeHorses");

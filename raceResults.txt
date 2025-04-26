@@ -1,8 +1,8 @@
-Thunder, A, 0.429, 0.50, 0.50, metal, light, black, arabian, 3, 3
-Lightning, B, 0.429, 0.50, 0.50, metal, light, black, arabian, 0, 2
-Storm, C, 0.306, 0.50, 0.50, metal, light, black, arabian, 0, 1
-sui, +, 0.361, 0.50, 0.50, metal, light, black, arabian, 0, 2
-aamir, G, 0.600, 0.50, 0.50, metal, light, black, arabian, 1, 1
-adam, L, 0.425, 0.50, 0.50, metal, light, black, arabian, 0, 1
-newest, Z, 0.425, 0.50, 0.50, Diamond, Doc Hudson, Black, Chick Hicks, 0, 2
-Alejandro, T, 0.500, 0.50, 0.50, Chainmail, Mator, Gray, Lightning McQueen, 0, 1
+Thunder, A, 0.425, 0.80, 0.80, metal, light, black, arabian, 5, 12
+Lightning, B, 0.425, 0.80, 0.80, metal, white, black, arabian, 3, 7
+Storm, C, 0.535, 0.80, 0.80, metal, light, black, arabian, 0, 6
+sui, +, 0.425, 0.80, 0.80, metal, light, brown, arabian, 4, 5
+aamir, G, 0.425, 0.80, 0.80, metal, light, gray, arabian, 2, 11
+adam, L, 0.600, 0.80, 0.80, metal, light, Chestnut, arabian, 1, 6
+newest, Z, 0.425, 0.39, 1.00, Diamond, Doc Hudson, brown, Chick Hicks, 0, 7
+Alejandro, T, 0.361, 0.50, 0.50, Chainmail, Mator, Gray, Lightning McQueen, 0, 1
