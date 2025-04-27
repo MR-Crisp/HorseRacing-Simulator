@@ -296,7 +296,7 @@ public class Gui extends JFrame {
             lanePanel.add(new JLabel("Lane " + (i + 1) + ":"));
 
             horseSelectors[i] = new JComboBox<>();
-            horseSelectors[i].addItem("-- Select Horse --");
+            horseSelectors[i].addItem("select");
             for (Horse horse : availableHorses) {
                 if (horse != null) {
                     horseSelectors[i].addItem(horse.getName());
@@ -386,9 +386,9 @@ public class Gui extends JFrame {
     private JPanel createStartingScreenRace() {
         JPanel panel = new JPanel(new BorderLayout()) {
             @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D graphics2DPen = (Graphics2D) g;
+            protected void paintComponent(Graphics graphic) {
+                super.paintComponent(graphic);
+                Graphics2D graphics2DPen = (Graphics2D) graphic;
                 graphics2DPen.setStroke(new BasicStroke(2));
 
                 int panelWidth = getWidth();
@@ -527,7 +527,7 @@ public class Gui extends JFrame {
         back.setFont(new Font("Arial", Font.PLAIN, 24));
 
         // Race animation
-        Timer raceTimer = new Timer(100, e -> {
+        Timer timer = new Timer(100, e -> {
             boolean finished = race.incrementRace();
             panel.repaint();
 
@@ -556,12 +556,12 @@ public class Gui extends JFrame {
         });
 
         startBtn.addActionListener(e -> {
-            raceTimer.start();
+            timer.start();
             startBtn.setEnabled(false);
         });
 
         back.addActionListener(e -> {
-            raceTimer.stop();
+            timer.stop();
             cardLayout.show(cardPanel, "MainMenu");
         });
 

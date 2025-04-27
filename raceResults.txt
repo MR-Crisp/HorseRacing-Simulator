@@ -7,3 +7,4 @@ adam, L, 0.464, 0.80, 0.80, metal, light, Chestnut, arabian, 1, 15
 newest, Z, 0.425, 0.39, 1.00, Diamond, Doc Hudson, brown, Chick Hicks, 0, 19
 Alejandro, T, 0.361, 0.50, 0.50, Chainmail, Mator, Gray, Lightning McQueen, 0, 1
 Consti-hill, @, 0.425, 0.48, 1.00, Diamond, Doc Hudson, Black, Arabian, 0, 1
+Newest horse, T, 0.500, 0.62, 1.00, Leather, Western, White, Chick Hicks, 0, 0
