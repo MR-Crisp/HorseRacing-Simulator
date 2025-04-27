@@ -11,7 +11,7 @@ public class Gui extends JFrame {
     private Race race = new Race(20, 3); // default race class
 
     public Gui() {
-        setTitle("Game Start Screen");
+        setTitle("The Sim");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setSize(screenSize);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
