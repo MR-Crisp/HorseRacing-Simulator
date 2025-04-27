@@ -25,14 +25,12 @@ public class Gui extends JFrame {
         JPanel customizeHorses = createCustomizeHorsesPanel(screenSize);
         JPanel horseStats = createHorseStatsPanel(screenSize);
         JPanel trackSettings = createTrackSettingsPanel(screenSize);
-        JPanel betting = createViewPanel("betting", screenSize);
-        JPanel startRace = createRaceScreen();
+        JPanel startRace = createStartingScreenRace();
 
         cardPanel.add(mainMenu, "MainMenu");
         cardPanel.add(customizeHorses, "customizeHorses");
         cardPanel.add(horseStats, "horseStats");
         cardPanel.add(trackSettings, "trackSettings");
-        cardPanel.add(betting, "betting");
         cardPanel.add(startRace, "startRace");
 
         add(cardPanel);
@@ -48,7 +46,6 @@ public class Gui extends JFrame {
         JButton btn1 = new JButton("New Horse");
         JButton btn2 = new JButton("Horse Stats");
         JButton btn3 = new JButton("Track settings");
-        JButton btn4 = new JButton("Betting");
         JButton btn5 = new JButton("Start Race");
 
         btn1.addActionListener(e -> newHorseCreation());
@@ -59,13 +56,11 @@ public class Gui extends JFrame {
             cardLayout.show(cardPanel, "horseStats");
         });
         btn3.addActionListener(e -> cardLayout.show(cardPanel, "trackSettings"));
-        btn4.addActionListener(e -> cardLayout.show(cardPanel, "betting"));
         btn5.addActionListener(e -> cardLayout.show(cardPanel, "startRace"));
 
         panel.add(btn1);
         panel.add(btn2);
         panel.add(btn3);
-        panel.add(btn4);
         panel.add(btn5);
 
         return panel;
@@ -78,7 +73,7 @@ public class Gui extends JFrame {
         JLabel label = new JLabel(labelText, SwingConstants.CENTER);
         label.setFont(new Font("Arial", Font.BOLD, 48));
 
-        JButton backButton = new JButton("Back to Menu");
+        JButton backButton = new JButton("Back");
         backButton.setFont(new Font("Arial", Font.PLAIN, 24));
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "MainMenu"));
 
@@ -101,10 +96,10 @@ public class Gui extends JFrame {
         formPanel.setBorder(BorderFactory.createEmptyBorder(30, 100, 30, 100));
 
         JTextField horseNameField = new JTextField();
-        JComboBox<String> breedBox = new JComboBox<>(new String[] {"Arabian", "Thoroughbred", "Chick Hicks", "Lightning McQueen"});
-        JComboBox<String> colorBox = new JComboBox<>(new String[] {"Black", "Brown", "Chestnut", "Gray", "White"});
-        JComboBox<String> saddleBox = new JComboBox<>(new String[] {"Doc Hudson", "Western", "Racing", "Mator"});
-        JComboBox<String> shoeBox = new JComboBox<>(new String[] {"Diamond", "Iron", "Leather", "Chainmail"});
+        JComboBox<String> breedBox = new JComboBox<>(new String[]{"Arabian", "Thoroughbred", "Chick Hicks", "Lightning McQueen"});
+        JComboBox<String> colorBox = new JComboBox<>(new String[]{"Black", "Brown", "Chestnut", "Gray", "White"});
+        JComboBox<String> saddleBox = new JComboBox<>(new String[]{"Doc Hudson", "Western", "Racing", "Mator"});
+        JComboBox<String> shoeBox = new JComboBox<>(new String[]{"Diamond", "Iron", "Leather", "Chainmail"});
         JTextField symbolField = new JTextField();
 
         formPanel.add(new JLabel("Horse Name:"));
@@ -123,8 +118,8 @@ public class Gui extends JFrame {
         panel.add(formPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
-        JButton submitButton = new JButton("Submit");
-        JButton backButton = new JButton("Back to Menu");
+        JButton submitButton = new JButton("Enter");
+        JButton backButton = new JButton("Back");
 
         submitButton.setFont(new Font("Arial", Font.PLAIN, 18));
         backButton.setFont(new Font("Arial", Font.PLAIN, 18));
@@ -136,12 +131,18 @@ public class Gui extends JFrame {
             String saddle = (String) saddleBox.getSelectedItem();
             String shoe = (String) shoeBox.getSelectedItem();
             String symbol = symbolField.getText();
-            char horseSymbol = symbol.isEmpty() ? '?' : symbol.charAt(0);
+
+            if (horseName.isEmpty() || symbol.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Horse name and symbol cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            char horseSymbol = symbol.charAt(0);//takes the first symbol
 
             Horse h = new Horse(horseSymbol, horseName, breed, shoe, saddle, colour);
             h.writeToFile("raceResults.txt");
 
-            JOptionPane.showMessageDialog(this, "Horse created and saved!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Horse created and saved", "Success", JOptionPane.INFORMATION_MESSAGE);
 
             horseNameField.setText("");
             breedBox.setSelectedIndex(0);
@@ -233,7 +234,7 @@ public class Gui extends JFrame {
 
         panel.add(centerPanel, BorderLayout.CENTER);
 
-        JButton backButton = new JButton("Back to Menu");
+        JButton backButton = new JButton("Back");
         backButton.setFont(new Font("Arial", Font.PLAIN, 18));
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "MainMenu"));
         panel.add(backButton, BorderLayout.SOUTH);
@@ -346,7 +347,7 @@ public class Gui extends JFrame {
                 Horse[] selectedHorses = new Horse[race.getLanes()];
                 for (int i = 0; i < horseSelectors.length; i++) {
                     String selected = (String) horseSelectors[i].getSelectedItem();
-                    if (!selected.equals("-- Select Horse --")) {
+                    if (!selected.equals("Horse Selection")) {
                         for (Horse horse : availableHorses) {
                             if (horse != null && horse.getName().equals(selected)) {
                                 selectedHorses[i] = horse;
@@ -367,12 +368,12 @@ public class Gui extends JFrame {
         });
 
         // Back button
-        JButton backButton = new JButton("Back to Menu");
-        backButton.addActionListener(e -> cardLayout.show(cardPanel, "MainMenu"));
+        JButton back = new JButton("Back");
+        back.addActionListener(e -> cardLayout.show(cardPanel, "MainMenu"));
 
         buttonPanel.add(updateLanesButton);
         buttonPanel.add(saveButton);
-        buttonPanel.add(backButton);
+        buttonPanel.add(back);
 
         contentPanel.add(buttonPanel);
 
@@ -382,10 +383,7 @@ public class Gui extends JFrame {
         return panel;
     }
 
-
-
-
-    private JPanel createRaceScreen() {
+    private JPanel createStartingScreenRace() {
         JPanel panel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -402,8 +400,8 @@ public class Gui extends JFrame {
 
                 if (numLanes == 0 || horses == null) return;
 
-                int marginX = (int) (panelWidth * 0.1); // 10% margins on sides
-                int marginY = (int) (panelHeight * 0.1); // 10% margins on top/bottom
+                int marginX = (int) (panelWidth * 0.1); // 10% margin on sides
+                int marginY = (int) (panelHeight * 0.1); // 10% margin on top/bottom
 
                 int usableWidth = panelWidth - 2 * marginX;
                 int usableHeight = panelHeight - 2 * marginY;
@@ -414,29 +412,29 @@ public class Gui extends JFrame {
                 for (int i = 0; i < numLanes; i++) {
                     int laneTop = marginY + i * laneHeight;
 
-                    // Lane background depending on the weather. default/normal are same.
-                    switch (race.getWeatherConditions()){
+                    // Lane background depending on the weather.
+                    switch (race.getWeatherConditions()) {
                         case "Blazing":
-                            graphics2DPen.setColor(new Color(255, 36, 0));
+                            graphics2DPen.setColor(new Color(255, 36, 0)); // Red for blazing
                             break;
                         case "Normal":
-                            graphics2DPen.setColor(new Color(255, 239, 184));
+                            graphics2DPen.setColor(new Color(255, 239, 184)); // Beige for normal
                             break;
                         case "Raining":
-                            graphics2DPen.setColor(new Color(113, 138, 150));
+                            graphics2DPen.setColor(new Color(113, 138, 150)); // Grayish blue for raining
                             break;
                         case "Freezing":
-                            graphics2DPen.setColor(new Color(173, 216, 230));
+                            graphics2DPen.setColor(new Color(173, 216, 230)); // Light blue for freezing
                             break;
-                      
                     }
 
                     graphics2DPen.fillRect(marginX, laneTop, usableWidth, laneHeight);
 
-                    // Lane border
+                    // Lane boundary
                     graphics2DPen.setColor(Color.BLACK);
                     graphics2DPen.drawRect(marginX, laneTop, usableWidth, laneHeight);
 
+                    // If a horse is assigned to this lane
                     if (i < horses.length && horses[i] != null) {
                         Horse horse = horses[i];
                         int distance = horse.getDistanceTravelled();
@@ -444,14 +442,21 @@ public class Gui extends JFrame {
 
                         int centerY = laneTop + laneHeight / 2;
 
-                        // Horse color by coat
-                        //Black", "Brown", "Chestnut", "Gray", "White
+                        // Draw the horse name at the start of the lane (fixed position)
+                        graphics2DPen.setColor(Color.BLACK);
+                        graphics2DPen.setFont(new Font("Arial", Font.BOLD, laneHeight / 15));
+                        graphics2DPen.drawString(horse.getName(), marginX - 150, centerY + 5); // Adjust `-80` for name spacing
+
+
+                        int horseSize = laneHeight / 2;
+
+                        // Set colour for horse depending on the coat color
                         switch (horse.getColour().toLowerCase()) {
                             case "black":
                                 graphics2DPen.setColor(Color.BLACK);
                                 break;
                             case "brown":
-                                graphics2DPen.setColor(new Color(233, 116, 81));//they dont have a default brown value so i put burnt siena
+                                graphics2DPen.setColor(new Color(233, 116, 81)); // Burnt sienna
                                 break;
                             case "gray":
                                 graphics2DPen.setColor(Color.GRAY);
@@ -463,18 +468,16 @@ public class Gui extends JFrame {
                                 graphics2DPen.setColor(Color.YELLOW);
                         }
 
-                        // If fallen, draw black cross
+                        // If fallen, draw a black cross where the horse is supposed to be
                         if (horse.hasFallen()) {
-                            graphics2DPen.setColor(Color.BLACK);
+                            graphics2DPen.setColor(Color.RED);
                             int size = laneHeight / 3;
+                            graphics2DPen.fillOval(x - size, centerY - size, size * 2, size * 2);
                             graphics2DPen.drawLine(x - size, centerY - size, x + size, centerY + size);
                             graphics2DPen.drawLine(x - size, centerY + size, x + size, centerY - size);
-
-                            graphics2DPen.setFont(new Font("Arial", Font.BOLD, laneHeight / 5));
-                            graphics2DPen.drawString(horse.getName(), x + 5, centerY + size + 15);
                         } else {
                             // Horse shape by breed
-                            int horseSize = laneHeight / 2;
+                            horseSize = laneHeight / 2;
                             switch (horse.getBreed().toLowerCase()) {
                                 case "thoroughbred":
                                     graphics2DPen.fillOval(x, centerY - horseSize / 2, horseSize, horseSize);
@@ -494,15 +497,17 @@ public class Gui extends JFrame {
                                     break;
                             }
 
-                            // Horse info
-                            graphics2DPen.setColor(Color.BLACK);
-                            graphics2DPen.setFont(new Font("Arial", Font.BOLD, laneHeight / 5));
-                            graphics2DPen.drawString(horse.getName(), x + horseSize + 5, centerY);
+                            // Draw the horse's symbol inside the shape
+                            graphics2DPen.setColor(Color.RED); // Symbol color
+                            graphics2DPen.setFont(new Font("Arial", Font.BOLD, horseSize / 3));
+                            int symbolX = x + horseSize / 4; // Center the symbol horizontally
+                            int symbolY = centerY + horseSize / 4; // Center the symbol vertically
+                            graphics2DPen.drawString(String.valueOf(horse.getSymbol()), symbolX, symbolY);
                         }
                     }
                 }
 
-                // Draw finish line ONLY from top of first lane to bottom of last lane
+                // Draw finish line ONLY from the top of the first lane to the bottom of the last lane
                 int finishX = marginX + usableWidth;
                 int finishTop = marginY;
                 int finishBottom = marginY + laneHeight * numLanes;
@@ -514,12 +519,12 @@ public class Gui extends JFrame {
         };
 
         // Buttons panel
-        JPanel buttonPanel = new JPanel();
-        JButton startButton = new JButton("Start Race");
-        JButton backButton = new JButton("Back to Menu");
+        JPanel btnPanel = new JPanel();
+        JButton startBtn = new JButton("Start Race");
+        JButton back = new JButton("Go back");
 
-        startButton.setFont(new Font("Arial", Font.PLAIN, 24));
-        backButton.setFont(new Font("Arial", Font.PLAIN, 24));
+        startBtn.setFont(new Font("Arial", Font.PLAIN, 24));
+        back.setFont(new Font("Arial", Font.PLAIN, 24));
 
         // Race animation
         Timer raceTimer = new Timer(100, e -> {
@@ -528,43 +533,42 @@ public class Gui extends JFrame {
 
             if (finished) {
                 ((Timer) e.getSource()).stop();
-                StringBuilder winners = new StringBuilder("Winner(s):\n");
+                StringBuilder winners = new StringBuilder("WINNER:\n");
                 Horse[] horses = race.getHorseArray();
 
                 for (Horse h : horses) {
                     if (h != null && h.getDistanceTravelled() >= race.getRaceLength()) {
                         winners.append(h.getName()).append("\n");
                     }
+                }
+
+                JOptionPane.showMessageDialog(panel, winners.toString(), "Race Results", JOptionPane.INFORMATION_MESSAGE);
+
+                // Reset horses after OK button is pressed
+                for (Horse h : horses) {
                     if (h != null) {
                         h.goBackToStart();
                     }
                 }
 
-                JOptionPane.showMessageDialog(panel, winners.toString());
-                startButton.setEnabled(true);
+                startBtn.setEnabled(true);
             }
         });
 
-        startButton.addActionListener(e -> {
-            // Reset horses
-            for (Horse h : race.getHorseArray()) {
-                if (h != null) {
-                    h.goBackToStart();
-                }
-            }
+        startBtn.addActionListener(e -> {
             raceTimer.start();
-            startButton.setEnabled(false);
+            startBtn.setEnabled(false);
         });
 
-        backButton.addActionListener(e -> {
+        back.addActionListener(e -> {
             raceTimer.stop();
             cardLayout.show(cardPanel, "MainMenu");
         });
 
-        buttonPanel.add(startButton);
-        buttonPanel.add(backButton);
+        btnPanel.add(startBtn);
+        btnPanel.add(back);
 
-        panel.add(buttonPanel, BorderLayout.SOUTH);
+        panel.add(btnPanel, BorderLayout.SOUTH);
         return panel;
     }
 

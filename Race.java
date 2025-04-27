@@ -132,7 +132,9 @@ public class Race {
             if (horse != null && horse.getDistanceTravelled() >= raceLength) {
                 horse.setRacesWon(horse.getRacesWon()+1);//plus 1 races one
                 for(Horse allHorses: horseArray){
-                    allHorses.setTotalRaces(horse.getTotalRaces()+1);//increment total races for horse
+                    if (horse!=null) {
+                        allHorses.setTotalRaces(horse.getTotalRaces() + 1);//increment total races for horse
+                    }
                 }
                 horse.setTotalRaces(horse.getTotalRaces()+1);
                 changeHorseConfidence();//race over and change horse confidence
