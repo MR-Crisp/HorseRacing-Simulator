@@ -15,11 +15,7 @@ public class Horse
     private int distance;
     private boolean fallen;
 
-      
-    //Constructor of class Horse
-    /**
-     * Constructor for objects of class Horse
-     */
+
     public Horse(char horseSymbol, String horseName, double horseConfidence) {
         name = horseName;
         symbol = horseSymbol;

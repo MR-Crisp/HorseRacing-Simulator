@@ -70,6 +70,7 @@ public class Race
                 if (horseArray[i]!=null){
                     if (raceWonBy(horseArray[i])){
                         finished = true;
+                        System.out.println("Horse " + horseArray[i].getName() + " has won the race!");
                     }
                 }
             }

@@ -1,0 +1,6 @@
+Thunder,A,0.714
+Lightning,B,0.714
+Storm,C,0.574
+sui,+,0.5
+aamir,G,0.5
+adam,L,0.5
